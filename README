@@ -1,6 +1,6 @@
 ------------------ REDSPARC DEVELOPMENT KIT README ----------------------
 
--------------------------- INSTALLATION ---------------------------------
+---------------------- INSTALLATION ON UNIX -----------------------------
 
 Compilation and installation on Unix should be pretty simple. Just run
 
@@ -10,15 +10,26 @@ and then run
 
 	make install
 
-NOTE FOR UNIX USERS: If you wish to specify a custom path for the
-libraries, pass LIB_PATH=/path/to/libs to make. Likewise, if you wish to
-install the binaries in a custom path, pass INSTALL_PATH=/path/to/install
-to make.
+The binaries should now be installed and you should be able to run zasm
+and zlink from the terminal.
 
-NOTE FOR WINDOWS USERS: Compiling on Windows is no different from
-compiling on Unix. Running "make install", however, will not work as the
-makefile uses the Unix cp command. You will have to manually copy the
-files to whatever directory you want them stored in.
+NOTE: If you wish to specify a custom path for the
+libraries, pass LIB_PATH=/path/to/libs to make AND make install.
+Likewise, if you wish to install the binaries in a custom path, pass
+INSTALL_PATH=/path/to/install to make.
+
+--------------------- INSTALLATION ON WINDOWS ---------------------------
+
+Compilation is slightly more complex on Windows. You must specify the
+default library directory. This is done by passing LIB_PATH=c:\libpath
+to make. So to compile run
+
+	make LIB_PATH=c:\libpath
+
+The binaries will now be in the source directory. Running "make install"
+will not work. You will have to manually copy the files to whatever
+directory you want them stored in, and you MUST copy the CONTENTS of the
+libs folder to whatever you specified as your library path
 
 --------------------------- DOCUMENTATION -------------------------------
 
