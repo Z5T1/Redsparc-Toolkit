@@ -1,0 +1,6 @@
+*.asm
+*.zob
+*.rs
+*.o
+zasm
+zlink
