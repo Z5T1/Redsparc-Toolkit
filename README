@@ -16,7 +16,7 @@ and zlink from the terminal.
 NOTE: If you wish to specify a custom path for the
 libraries, pass LIB_PATH=/path/to/libs to make AND make install.
 Likewise, if you wish to install the binaries in a custom path, pass
-INSTALL_PATH=/path/to/install to make.
+INSTALL_PATH=/path/to/install to make install.
 
 --------------------- INSTALLATION ON WINDOWS ---------------------------
 
