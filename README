@@ -1,0 +1,25 @@
+------------------ REDSPARC DEVELOPMENT KIT README ----------------------
+
+-------------------------- INSTALLATION ---------------------------------
+
+Compilation and installation on Unix should be pretty simple. Just run
+
+	make
+
+and then run
+
+	make install
+
+NOTE FOR UNIX USERS: If you wish to specify a custom path for the
+libraries, pass LIB_PATH=/path/to/libs to make. Likewise, if you wish to
+install the binaries in a custom path, pass INSTALL_PATH=/path/to/install
+to make.
+
+NOTE FOR WINDOWS USERS: Compiling on Windows is no different from
+compiling on Unix. Running "make install", however, will not work as the
+makefile uses the Unix cp command. You will have to manually copy the
+files to whatever directory you want them stored in.
+
+--------------------------- DOCUMENTATION -------------------------------
+
+Documentation for this software can be found at http://z5t1.com/redsparc.
