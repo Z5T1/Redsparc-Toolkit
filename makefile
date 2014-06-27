@@ -7,7 +7,8 @@ all: zasm zlink
 install: all
 	cp zasm $(INSTALL_PATH)/zasm
 	cp zlink $(INSTALL_PATH)/zlink
-	cp libs $(LIB_PATH) -r
+	if [ ! -e $(LIB_PATH) ]; then mkdir $(LIB_PATH); fi;
+	cp libs/* $(LIB_PATH) -r
 
 zasm: zasm.c
 	$(CC) zasm.c -o zasm
