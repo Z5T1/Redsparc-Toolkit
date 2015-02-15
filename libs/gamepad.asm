@@ -27,13 +27,11 @@ gamepad_flush:
 ; Results:
 ;	AX = value read (see the Gamepad Key Values table)
 ; Clobbers:
-;	BX
+;	AX
 gamepad_get:
-	mov bx, 0
-_gamepad_get_loop_top:
 	in ax, 9
-	cmp ax, bx
-	je _gamepad_get_loop_top
+	cmp ax, 0
+	je gamepad_get
 _gamepad_get_loop_end:
 	out 0, 9
 	ret

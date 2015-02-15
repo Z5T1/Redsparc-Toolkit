@@ -27,13 +27,11 @@ numpad_flush:
 ; Results:
 ;	AX = number read
 ; Clobbers:
-;	BX
+;	AX
 numpad_get:
-	mov bx, 100000
-_numpad_get_loop_top:
 	in ax, 0
-	cmp ax, bx
-	je _numpad_get_loop_top
+	cmp ax, 100000
+	je numpad_get
 _numpad_get_loop_end:
 	out 100000, 0
 	ret

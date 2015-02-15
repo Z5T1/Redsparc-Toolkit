@@ -12,7 +12,7 @@
 
 ; Register Usage:
 ;	AX = first operand
-;	BX = comparison value
+;	BX = unused
 ;	CX = second operand
 ;	DX = operation
 
@@ -41,23 +41,19 @@ top:
 	
 	;;;; Compare Operation ;;;;
 	; Addition
-	mov bx, 9
-	cmp bx, dx
+	cmp dx, 9
 	je addition
 	
 	; Subtraction
-	mov bx, 10
-	cmp bx, dx
+	cmp dx, 10
 	je subtraction
 	
 	; Multiplication
-	mov bx, 11
-	cmp bx, dx
+	cmp dx, 11
 	je multiplication
 	
 	; Division
-	mov bx, 12
-	cmp bx, dx
+	cmp dx, 12
 	je division
 	
 	out 1, 7

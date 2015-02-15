@@ -2,13 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define VERSION "1.0.0"
+#define VERSION "1.0.1"
 
 #define LINE_BUFFER_SIZE 1024
 
 int line_number;
 
 char is_numeric_char(char c);
+
+int get_redsparc_char(char c);
 
 int get_register_address(char* name);
 
@@ -82,6 +84,67 @@ char is_numeric_char(char c) {
 		return 0;
 }
 
+int get_redsparc_char(char c) {
+	if (c >= 'A' && c <= 'Z') {
+		return c-54;
+	}
+	else if (c >= 'a' && c <= 'z') {
+		return c-86;
+	}
+	else if (c >= '0' && c <= '9') {
+		return c-47;
+	}
+	switch (c) {
+	case '_':
+		return 37;
+	case '=':
+		return 38;
+	case '\\':
+		return 39;
+	case '(':
+		return 40;
+	case ')':
+		return 41;
+	case '-':
+		return 42;
+	case '+':
+		return 43;
+	case ';':
+		return 44;
+	case ':':
+		return 45;
+	case '\'':
+		return 46;
+	case '"':
+		return 47;
+	case ',':
+		return 48;
+	case '.':
+		return 49;
+	case '<':
+		return 50;
+	case '>':
+		return 51;
+	case '?':
+		return 52;
+	case '!':
+		return 53;
+	case '/':
+		return 54;
+	case '*':
+		return 55;
+	case '|':
+		return 56;
+	case ' ':
+		return 57;
+	case '\n':
+		return 58;
+	case '\t':
+		return 59;
+	}
+	return -1;
+}
+
 int get_register_address(char* name) {
 	if (strcmp(name, "ax") == 0 || strcmp(name, "AX") == 0)
 		return 0;
@@ -130,11 +193,11 @@ void assemble(FILE* out, char* line) {
 			address = atoi(argv[1]);
 		}
 		else if (strcmp(argv[0], "dw") == 0) {
-			if (argc < 1) {
+			if (argc < 2) {
 				fprintf(out, "\t%i 0\n", address);
 				address++;
 			}
-			else if (argc < 2) {
+			else if (argc < 3) {
 				fprintf(out, "\t%i %s\n", address, argv[1]);
 				address++;
 			}
@@ -147,6 +210,57 @@ void assemble(FILE* out, char* line) {
 					address++;
 				}
 			}
+		}
+		else if (strcmp(argv[0], "ds") == 0) {
+			char* str;
+			int i;
+			
+			if (argc < 2) {
+				fprintf(stderr, "%i:\tds\tNo string defined\n", line_number);
+				exit(2);
+			}
+			
+			str = argv[1];
+			
+			for (i = 0; str[i] != '"'; i++)
+				continue;
+			i++;
+			
+			for (; str[i] != '"'; i++) {
+				// Space
+				if (str[i] == 0) {
+					fprintf(out, "\t%i %i\n", address, get_redsparc_char(' '));
+					address++;
+				}
+				// Escape Sequence
+				else if (str[i] == '\\') {
+					i++;
+					switch (str[i]) {
+					case '\\':
+						fprintf(out, "\t%i %i\n", address, get_redsparc_char('\\'));
+						address++;
+					case 'n':
+						fprintf(out, "\t%i %i\n", address, get_redsparc_char('\n'));
+						address++;
+					case 't':
+						fprintf(out, "\t%i %i\n", address, get_redsparc_char('\t'));
+						address++;
+					case '"':
+						fprintf(out, "\t%i %i\n", address, get_redsparc_char('\"'));
+						address++;
+					default:
+						fprintf(stderr, "%i:\tds\tUnrecognized escape sequence: \%c", line_number, str[i]);
+					}
+				}
+				else {
+					fprintf(out, "\t%i %i\n", address, get_redsparc_char(str[i]));
+					address++;
+				}
+			}
+			
+			fprintf(out, "\t%i 0\n", address);
+			address++;
+			
 		}
 		else if (strcmp(argv[0], "hlt") == 0) {
 			fprintf(out, "\t%i 0\n", address);
@@ -415,17 +529,23 @@ void assemble(FILE* out, char* line) {
 				fprintf(stderr, "%i:\tadd\tinvalid destination register address\n", line_number);
 				exit(2);
 			}
-			if (sreg < 0) {
-				fprintf(stderr, "%i:\tadd\tinvalid source register address\n", line_number);
-				exit(2);
-			}
 			
-			fprintf(out, "\t%i 32\n", address);
-			address++;
-			fprintf(out, "\t%i %i\n", address, dreg);
-			address++;
-			fprintf(out, "\t%i %i\n", address, sreg);
-			address++;
+			if (sreg < 0) {
+				fprintf(out, "\t%i 64\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %s\n", address, argv[2]);
+				address++;
+			}
+			else {
+				fprintf(out, "\t%i 32\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %i\n", address, sreg);
+				address++;
+			}
 			
 		}
 		else if (strcmp(argv[0], "sub") == 0) {
@@ -444,17 +564,23 @@ void assemble(FILE* out, char* line) {
 				fprintf(stderr, "%i:\tsub\tinvalid destination register address\n", line_number);
 				exit(2);
 			}
-			if (sreg < 0) {
-				fprintf(stderr, "%i:\tsub\tinvalid source register address\n", line_number);
-				exit(2);
-			}
 			
-			fprintf(out, "\t%i 33\n", address);
-			address++;
-			fprintf(out, "\t%i %i\n", address, dreg);
-			address++;
-			fprintf(out, "\t%i %i\n", address, sreg);
-			address++;
+			if (sreg < 0) {
+				fprintf(out, "\t%i 65\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %s\n", address, argv[2]);
+				address++;
+			}
+			else {
+				fprintf(out, "\t%i 33\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %i\n", address, sreg);
+				address++;
+			}
 			
 		}
 		else if (strcmp(argv[0], "mul") == 0) {
@@ -473,17 +599,23 @@ void assemble(FILE* out, char* line) {
 				fprintf(stderr, "%i:\tmul\tinvalid destination register address\n", line_number);
 				exit(2);
 			}
-			if (sreg < 0) {
-				fprintf(stderr, "%i:\tmul\tinvalid source register address\n", line_number);
-				exit(2);
-			}
 			
-			fprintf(out, "\t%i 34\n", address);
-			address++;
-			fprintf(out, "\t%i %i\n", address, dreg);
-			address++;
-			fprintf(out, "\t%i %i\n", address, sreg);
-			address++;
+			if (sreg < 0) {
+				fprintf(out, "\t%i 66\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %s\n", address, argv[2]);
+				address++;
+			}
+			else {
+				fprintf(out, "\t%i 34\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %i\n", address, sreg);
+				address++;
+			}
 			
 		}
 		else if (strcmp(argv[0], "div") == 0) {
@@ -502,17 +634,23 @@ void assemble(FILE* out, char* line) {
 				fprintf(stderr, "%i:\tdiv\tinvalid destination register address\n", line_number);
 				exit(2);
 			}
-			if (sreg < 0) {
-				fprintf(stderr, "%i:\tdiv\tinvalid source register address\n", line_number);
-				exit(2);
-			}
 			
-			fprintf(out, "\t%i 35\n", address);
-			address++;
-			fprintf(out, "\t%i %i\n", address, dreg);
-			address++;
-			fprintf(out, "\t%i %i\n", address, sreg);
-			address++;
+			if (sreg < 0) {
+				fprintf(out, "\t%i 67\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %s\n", address, argv[2]);
+				address++;
+			}
+			else {
+				fprintf(out, "\t%i 35\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %i\n", address, sreg);
+				address++;
+			}
 			
 		}
 		else if (strcmp(argv[0], "mod") == 0) {
@@ -531,17 +669,23 @@ void assemble(FILE* out, char* line) {
 				fprintf(stderr, "%i:\tmod\tinvalid destination register address\n", line_number);
 				exit(2);
 			}
-			if (sreg < 0) {
-				fprintf(stderr, "%i:\tmod\tinvalid source register address\n", line_number);
-				exit(2);
-			}
 			
-			fprintf(out, "\t%i 36\n", address);
-			address++;
-			fprintf(out, "\t%i %i\n", address, dreg);
-			address++;
-			fprintf(out, "\t%i %i\n", address, sreg);
-			address++;
+			if (sreg < 0) {
+				fprintf(out, "\t%i 68\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %s\n", address, argv[2]);
+				address++;
+			}
+			else {
+				fprintf(out, "\t%i 36\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %i\n", address, sreg);
+				address++;
+			}
 			
 		}
 		else if (strcmp(argv[0], "and") == 0) {
@@ -560,17 +704,23 @@ void assemble(FILE* out, char* line) {
 				fprintf(stderr, "%i:\tand\tinvalid destination register address\n", line_number);
 				exit(2);
 			}
-			if (sreg < 0) {
-				fprintf(stderr, "%i:\tand\tinvalid source register address\n", line_number);
-				exit(2);
-			}
 			
-			fprintf(out, "\t%i 37\n", address);
-			address++;
-			fprintf(out, "\t%i %i\n", address, dreg);
-			address++;
-			fprintf(out, "\t%i %i\n", address, sreg);
-			address++;
+			if (sreg < 0) {
+				fprintf(out, "\t%i 69\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %s\n", address, argv[2]);
+				address++;
+			}
+			else {
+				fprintf(out, "\t%i 37\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %i\n", address, sreg);
+				address++;
+			}
 			
 		}
 		else if (strcmp(argv[0], "or") == 0) {
@@ -589,17 +739,23 @@ void assemble(FILE* out, char* line) {
 				fprintf(stderr, "%i:\tor\tinvalid destination register address\n", line_number);
 				exit(2);
 			}
-			if (sreg < 0) {
-				fprintf(stderr, "%i:\tor\tinvalid source register address\n", line_number);
-				exit(2);
-			}
 			
-			fprintf(out, "\t%i 38\n", address);
-			address++;
-			fprintf(out, "\t%i %i\n", address, dreg);
-			address++;
-			fprintf(out, "\t%i %i\n", address, sreg);
-			address++;
+			if (sreg < 0) {
+				fprintf(out, "\t%i 70\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %s\n", address, argv[2]);
+				address++;
+			}
+			else {
+				fprintf(out, "\t%i 38\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %i\n", address, sreg);
+				address++;
+			}
 			
 		}
 		else if (strcmp(argv[0], "xor") == 0) {
@@ -618,17 +774,23 @@ void assemble(FILE* out, char* line) {
 				fprintf(stderr, "%i:\txor\tinvalid destination register address\n", line_number);
 				exit(2);
 			}
-			if (sreg < 0) {
-				fprintf(stderr, "%i:\txor\tinvalid source register address\n", line_number);
-				exit(2);
-			}
 			
-			fprintf(out, "\t%i 39\n", address);
-			address++;
-			fprintf(out, "\t%i %i\n", address, dreg);
-			address++;
-			fprintf(out, "\t%i %i\n", address, sreg);
-			address++;
+			if (sreg < 0) {
+				fprintf(out, "\t%i 71\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %s\n", address, argv[2]);
+				address++;
+			}
+			else {
+				fprintf(out, "\t%i 39\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %i\n", address, sreg);
+				address++;
+			}
 			
 		}
 		else if (strcmp(argv[0], "inc") == 0) {
@@ -693,17 +855,23 @@ void assemble(FILE* out, char* line) {
 				fprintf(stderr, "%i:\tcmp\tinvalid destination register address\n", line_number);
 				exit(2);
 			}
-			if (sreg < 0) {
-				fprintf(stderr, "%i:\tcmp\tinvalid source register address\n", line_number);
-				exit(2);
-			}
 			
-			fprintf(out, "\t%i 48\n", address);
-			address++;
-			fprintf(out, "\t%i %i\n", address, dreg);
-			address++;
-			fprintf(out, "\t%i %i\n", address, sreg);
-			address++;
+			if (sreg < 0) {
+				fprintf(out, "\t%i 55\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %s\n", address, argv[2]);
+				address++;
+			}
+			else {			
+				fprintf(out, "\t%i 48\n", address);
+				address++;
+				fprintf(out, "\t%i %i\n", address, dreg);
+				address++;
+				fprintf(out, "\t%i %i\n", address, sreg);
+				address++;
+			}
 			
 		}
 		else if (strcmp(argv[0], "je") == 0) {

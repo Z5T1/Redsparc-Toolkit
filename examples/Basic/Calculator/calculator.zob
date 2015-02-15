@@ -1,0 +1,95 @@
+setup
+	0 16
+	1 6
+	2 stack_top
+top
+	3 10
+	4 numpad_get
+	5 0
+	6 17
+	7 2
+	8 0
+	9 10
+	10 gamepad_get
+	11 0
+	12 17
+	13 3
+	14 0
+	15 10
+	16 numpad_get
+	17 0
+	18 55
+	19 3
+	20 9
+	21 49
+	22 addition
+	23 0
+	24 55
+	25 3
+	26 10
+	27 49
+	28 subtraction
+	29 0
+	30 55
+	31 3
+	32 11
+	33 49
+	34 multiplication
+	35 0
+	36 55
+	37 3
+	38 12
+	39 49
+	40 division
+	41 0
+	42 1
+	43 1
+	44 7
+	45 0
+	46 0
+	47 0
+addition
+	48 32
+	49 2
+	50 0
+	51 12
+	52 result
+	53 0
+subtraction
+	54 33
+	55 2
+	56 0
+	57 12
+	58 result
+	59 0
+multiplication
+	60 34
+	61 2
+	62 0
+	63 12
+	64 result
+	65 0
+division
+	66 35
+	67 2
+	68 0
+	69 12
+	70 result
+	71 0
+result
+	72 2
+	73 2
+	74 1
+	75 0
+	76 0
+	77 0
+stack_bottom
+	78 0
+	79 0
+	80 0
+	81 0
+	82 0
+	83 0
+	84 0
+stack_top
+	85 0
