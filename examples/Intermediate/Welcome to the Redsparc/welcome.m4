@@ -1,87 +1,87 @@
 ;;;;;;;;;;;;;;;;;;; The Redsparc Welcome Program ;;;;;;;;;;;;;;;;;;;;;;;
 
-; Included io.m4                   
-; Included gpu.m4                                 
+include(io.m4)
+include(gpu.m4)
 
 ; This program welcomes the user to the Redsparc, giving him a brief
 ; tutorial of how to use the computer.
 
 ; Loading Screen
 screen_loading:
-	out 65, 17	; GPU Command = printstring
-	out 1, 18					; GPU_X1 = 1
-	out 1, 19					; GPU_Y1 = 1
-	out str_loading, 24	; Write String Location
-	out 1, 16							; Execute
+	out GPU_CMD_LARGE_PRINTSTRING, PORT_GPU_COMMAND	; GPU Command = printstring
+	out 1, PORT_GPU_X1					; GPU_X1 = 1
+	out 1, PORT_GPU_Y1					; GPU_Y1 = 1
+	out str_loading, PORT_GPU_REGISTER	; Write String Location
+	GPU_Execute							; Execute
 	mov ax, ax							; Wait one CPU cycle (The GPU gets angry if we don't)
 
 ; Screen 1
 screen_1:
-	out 81, 17	; GPU Command = printstring
-	out 1, 23				; Set Working buffer to 1 (double buffer mode)
-	out 1, 18					; GPU_X1 = 1
+	out GPU_CMD_SMALL_PRINTSTRING, PORT_GPU_COMMAND	; GPU Command = printstring
+	out 1, PORT_GPU_BUFFER				; Set Working buffer to 1 (double buffer mode)
+	out 1, PORT_GPU_X1					; GPU_X1 = 1
 
 	; Line 1
-	out 1, 19					; GPU_Y1 = 1
-	out str_s1_l1, 24	; Write String Location
+	out 1, PORT_GPU_Y1					; GPU_Y1 = 1
+	out str_s1_l1, PORT_GPU_REGISTER	; Write String Location
 	call gpu_wait						; Wait
-	out 1, 16							; Execute
+	GPU_Execute							; Execute
 	mov ax, ax							; Wait one CPU cycle (The GPU gets angry if we don't)
 	
 	; Line 2
-	out 7, 19					; GPU_Y1 = 7
-	out str_s1_l2, 24	; Write String Location
+	out 7, PORT_GPU_Y1					; GPU_Y1 = 7
+	out str_s1_l2, PORT_GPU_REGISTER	; Write String Location
 	call gpu_wait						; Wait
-	out 1, 16							; Execute
+	GPU_Execute							; Execute
 	mov ax, ax							; Wait one CPU cycle (The GPU gets angry if we don't)
 	
 	; Line 3
-	out 13, 19					; GPU_Y1 = 13
-	out str_s1_l3, 24	; Write String Location
+	out 13, PORT_GPU_Y1					; GPU_Y1 = 13
+	out str_s1_l3, PORT_GPU_REGISTER	; Write String Location
 	call gpu_wait						; Wait
-	out 1, 16							; Execute
+	GPU_Execute							; Execute
 	mov ax, ax							; Wait one CPU cycle (The GPU gets angry if we don't)
 	
 	; Line 4
-	out 19, 19					; GPU_Y1 = 19
-	out str_s1_l4, 24	; Write String Location
+	out 19, PORT_GPU_Y1					; GPU_Y1 = 19
+	out str_s1_l4, PORT_GPU_REGISTER	; Write String Location
 	call gpu_wait						; Wait
-	out 1, 16							; Execute
+	GPU_Execute							; Execute
 	mov ax, ax							; Wait one CPU cycle (The GPU gets angry if we don't)
 	
 	; Line 5
-	out 25, 19					; GPU_Y1 = 25
-	out str_s1_l5, 24	; Write String Location
+	out 25, PORT_GPU_Y1					; GPU_Y1 = 25
+	out str_s1_l5, PORT_GPU_REGISTER	; Write String Location
 	call gpu_wait						; Wait
-	out 1, 16							; Execute
+	GPU_Execute							; Execute
 	mov ax, ax							; Wait one CPU cycle (The GPU gets angry if we don't)
 	
 	; Line 6
-	out 31, 19					; GPU_Y1 = 31
-	out str_s1_l6, 24	; Write String Location
+	out 31, PORT_GPU_Y1					; GPU_Y1 = 31
+	out str_s1_l6, PORT_GPU_REGISTER	; Write String Location
 	call gpu_wait						; Wait
-	out 1, 16							; Execute
+	GPU_Execute							; Execute
 	mov ax, ax							; Wait one CPU cycle (The GPU gets angry if we don't)
 
 	; Line 7
-	out 37, 19					; GPU_Y1 = 37
-	out str_s1_l7, 24	; Write String Location
+	out 37, PORT_GPU_Y1					; GPU_Y1 = 37
+	out str_s1_l7, PORT_GPU_REGISTER	; Write String Location
 	call gpu_wait						; Wait
-	out 1, 16							; Execute
+	GPU_Execute							; Execute
 	mov ax, ax							; Wait one CPU cycle (The GPU gets angry if we don't)
 	
 	; Line 8
-	out 43, 19					; GPU_Y1 = 43
-	out str_s1_l8, 24	; Write String Location
+	out 43, PORT_GPU_Y1					; GPU_Y1 = 43
+	out str_s1_l8, PORT_GPU_REGISTER	; Write String Location
 	call gpu_wait						; Wait
-	out 1, 16							; Execute
+	GPU_Execute							; Execute
 	mov ax, ax							; Wait one CPU cycle (The GPU gets angry if we don't)
 	
 	; Push Buffer 1 to the User
-	out 1, 17	; GPU Command = copy buffer
-	out 0, 24			; Destination Buffer = 0 (screen)
+	out GPU_CMD_COPY_BUFFER, PORT_GPU_COMMAND	; GPU Command = copy buffer
+	out 0, PORT_GPU_REGISTER			; Destination Buffer = 0 (screen)
 	call gpu_wait						; Wait
-	out 1, 16							; Execute
+	GPU_Execute							; Execute
 	
 	; Wait for the user
 	call keyboard_get
@@ -116,7 +116,7 @@ str_s1_l4:
 str_s1_l5:
 	ds "use your new"
 str_s1_l6:
-	ds "Redsparc. Press"
+	ds "computer. Press"
 str_s1_l7:
 	ds "any key to"
 str_s1_l8:
